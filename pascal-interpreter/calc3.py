@@ -22,7 +22,7 @@ class Interpreter(object):
     self.current_char = self.text[self.pos]
 
   def error(self):
-    raise Exception('Error parsing input')
+    raise Exception('Invalid syntax')
 
   def advance(self):
     self.pos += 1
@@ -56,6 +56,7 @@ class Interpreter(object):
         self.advance()
         return Token(MINUS, '-')
       self.error()
+    return Token(EOF, None)
 
   def eat(self, token_type):
     if self.current_token.type == token_type:
@@ -63,25 +64,22 @@ class Interpreter(object):
     else:
       self.error()
 
+  def term(self):
+    token = self.current_token
+    self.eat(INTEGER)
+    return token.value
+
   def expr(self):
     self.current_token = self.get_next_token()
-
-    left = self.current_token
-    self.eat(INTEGER)
-
-    op = self.current_token
-    if op.type == PLUS:
-      self.eat(PLUS)
-    else:
-      self.eat(MINUS)
-
-    right = self.current_token
-    self.eat(INTEGER)
-
-    if op.type == PLUS:
-      result = left.value + right.value
-    else:
-      result = left.value - right.value
+    result = self.term()
+    while self.current_token.type in (PLUS, MINUS):
+      token = self.current_token
+      if token.type == PLUS:
+        self.eat(PLUS)
+        result = result + self.term()
+      elif token.type == MINUS:
+        self.eat(MINUS)
+        result = result - self.term()
     return result
 
 def main():
