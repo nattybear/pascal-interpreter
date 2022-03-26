@@ -86,7 +86,7 @@ class Interpreter(object):
       elif token.type == DIV:
         self.eat(DIV)
         result = result / self.factor()
-      return result
+    return result
   
 def main():
   while True:
